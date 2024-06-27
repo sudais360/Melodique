@@ -1,9 +1,11 @@
+// NeomorphicButton.js
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, Image } from 'react-native';
 
-const NeomorphicButton = ({ onPress, title }) => {
+const NeomorphicButton = ({ onPress, title, image }) => {
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
+      {image && <Image source={image} style={styles.image} />}
       <Text style={styles.text}>{title}</Text>
     </TouchableOpacity>
   );
@@ -11,6 +13,8 @@ const NeomorphicButton = ({ onPress, title }) => {
 
 const styles = StyleSheet.create({
   button: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#ecf0f1',
     borderRadius: 12,
     shadowColor: '#000',
@@ -20,13 +24,17 @@ const styles = StyleSheet.create({
     elevation: 10,
     paddingVertical: 12,
     paddingHorizontal: 24,
-    alignItems: 'center',
     marginVertical: 12,
   },
   text: {
     fontFamily: 'Poppins-Regular',
     color: '#000',
     fontSize: 16,
+    marginLeft: 10,
+  },
+  image: {
+    width: 24,
+    height: 24,
   },
 });
 

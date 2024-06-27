@@ -1,7 +1,9 @@
+// SignupScreen.js
 import React, { useState } from 'react';
 import { SafeAreaView, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import NeomorphicButton from '../components/NeomorphicButton';
 import NeomorphicInput from '../components/NeomorphicInput';
+import { signup, login } from '../api';
 
 const SignupScreen = ({ navigation }) => {
   const [name, setName] = useState('');
@@ -14,25 +16,19 @@ const SignupScreen = ({ navigation }) => {
       alert("Passwords do not match");
       return;
     }
-  
+
     try {
-      const response = await fetch('http://192.168.1.17:5000/signup', { // Replace with your local IP address
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: name,
-          email: email,
-          password: password,
-        }),
-      });
-      const data = await response.json();
-  
-      if (response.status === 201) {
+      const data = await signup(name, email, password);
+
+      if (data.message === 'User created successfully') {
         alert('User created successfully');
         // Automatically log in the user after successful signup
-        handleLogin();
+        const loginData = await login(email, password);
+        if (loginData.message === 'Login successful') {
+          navigation.navigate('MainPage', { userId: loginData.user_id });
+        } else {
+          alert(loginData.message);
+        }
       } else {
         alert(data.message);
       }
@@ -41,7 +37,6 @@ const SignupScreen = ({ navigation }) => {
       alert('An error occurred. Please try again.');
     }
   };
-  
 
   return (
     <SafeAreaView style={styles.background}>

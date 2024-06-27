@@ -1,7 +1,9 @@
+// LoginScreen.js
 import React, { useState } from 'react';
 import { SafeAreaView, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import NeomorphicButton from '../components/NeomorphicButton';
 import NeomorphicInput from '../components/NeomorphicInput';
+import { login } from '../api';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -9,22 +11,11 @@ const LoginScreen = ({ navigation }) => {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch('http://192.168.1.17:5000/login', { // Replace with your local IP address
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-        }),
-      });
-      const data = await response.json();
-  
-      if (response.status === 200) {
+      const data = await login(email, password);
+
+      if (data.message === 'Login successful') {
         alert('Login successful');
-        // Navigate to the main app screen with user_id
-        navigation.navigate('MainPage', { userId: data.user_id }); // Ensure this matches the registered screen name
+        navigation.navigate('MainPage', { userId: data.user_id });
       } else {
         alert(data.message);
       }
@@ -33,7 +24,6 @@ const LoginScreen = ({ navigation }) => {
       alert('An error occurred. Please try again.');
     }
   };
-  
 
   return (
     <SafeAreaView style={styles.background}>

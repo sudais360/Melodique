@@ -1,77 +1,178 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, FlatList, TouchableOpacity, ScrollView } from 'react-native';
+import axios from 'axios';
 
-const MainPage = ({ route, navigation }) => {
-  const { userId } = route.params;
-  const [playlists, setPlaylists] = useState([]);
+const MainPage = ({ navigation }) => {
+  const [hotHits, setHotHits] = useState([]);
+  const [topAlbums, setTopAlbums] = useState([]);
+  const [topArtists, setTopArtists] = useState([]);
+  const [podcasts, setPodcasts] = useState([]);
 
   useEffect(() => {
-    fetchPlaylists();
+    fetchHotHits();
+    fetchTopAlbums();
+    fetchTopArtists();
+    fetchPodcasts();
   }, []);
 
-  const fetchPlaylists = async () => {
+  const fetchHotHits = async () => {
     try {
-      const response = await fetch(`http://192.168.1.17:5000/playlists/${userId}`); // Replace with your local IP address
-      const data = await response.json();
-      setPlaylists(data);
+      const response = await axios.get('https://api.jamendo.com/v3.0/tracks?client_id=c36a1722&format=json&limit=5&order=popularity_total');
+      const tracks = response.data.results.map(track => ({
+        id: track.id,
+        name: track.name,
+        audio: track.audio, // Ensure this field is available
+        image: track.album_image,
+        artist_name: track.artist_name,
+        album_name: track.album_name
+      }));
+      setHotHits(tracks);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  
+  
+
+  const fetchTopAlbums = async () => {
+    try {
+      const response = await axios.get('https://api.jamendo.com/v3.0/albums?client_id=c36a1722&format=json&limit=5&order=popularity_total');
+      setTopAlbums(response.data.results);
     } catch (error) {
       console.error(error);
     }
   };
 
+  const fetchTopArtists = async () => {
+    try {
+      const response = await axios.get('https://api.jamendo.com/v3.0/artists?client_id=c36a1722&format=json&limit=5&order=popularity_total');
+      setTopArtists(response.data.results.filter(artist => artist.image));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchPodcasts = async () => {
+    try {
+      const response = await axios.get('https://listen-api.listennotes.com/api/v2/best_podcasts?genre_id=68', {
+        headers: {
+          'X-ListenAPI-Key': '8dbfc02302db418ba98a4bc6f8cfd6ae'
+        }
+      });
+      setPodcasts(response.data.podcasts);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const renderHotHitsItem = ({ item }) => (
+    <TouchableOpacity 
+      style={styles.itemContainer} 
+      onPress={() => navigation.navigate('SongPlayingPage', { 
+        track: {
+          name: item.name || 'Unknown Name',
+          artist_name: item.artist_name || 'Unknown Artist',
+          album_name: item.album_name || 'Unknown Album',
+          image: item.image || 'default_image_url',
+          audio: item.audio // Ensure the audio URL is passed
+        } 
+      })}
+    >
+      <Image source={{ uri: item.image }} style={styles.image} />
+      <Text style={styles.itemText}>{item.name}</Text>
+    </TouchableOpacity>
+  );
+  
+
+  const renderTopAlbumsItem = ({ item }) => (
+    <TouchableOpacity style={styles.itemContainer} onPress={() => navigation.navigate('AlbumPage', { album: item })}>
+      <Image source={{ uri: item.image }} style={styles.image} />
+      <Text style={styles.itemText}>{item.name}</Text>
+    </TouchableOpacity>
+  );
+
+  const renderTopArtistsItem = ({ item }) => (
+    <TouchableOpacity style={styles.itemContainer} onPress={() => navigation.navigate('ArtistPage', { artist: item })}>
+      <Image source={{ uri: item.image }} style={styles.image} />
+      <Text style={styles.itemText}>{item.name}</Text>
+    </TouchableOpacity>
+  );
+
+  const renderPodcastItem = ({ item }) => (
+    <TouchableOpacity style={styles.itemContainer} onPress={() => navigation.navigate('PodcastPage', { podcast: item })}>
+      <Image source={{ uri: item.thumbnail }} style={styles.image} />
+      <Text style={styles.itemText}>{item.title}</Text>
+    </TouchableOpacity>
+  );
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome to Melodique</Text>
-      <Text style={styles.subtitle}>Your Playlists</Text>
-      {playlists.length === 0 ? (
-        <Text style={styles.noPlaylists}>No playlists available</Text>
-      ) : (
-        playlists.map((playlist) => (
-          <View key={playlist.id} style={styles.playlistContainer}>
-            <Text style={styles.playlistName}>{playlist.name}</Text>
-          </View>
-        ))
-      )}
-      <Button title="Create New Playlist" onPress={() => navigation.navigate('CreatePlaylist', { userId })} />
-    </View>
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>Melodique</Text>
+      <Text style={styles.subtitle}>Hot Hits</Text>
+      <FlatList
+        horizontal
+        data={hotHits}
+        renderItem={renderHotHitsItem}
+        keyExtractor={item => item.id}
+        showsHorizontalScrollIndicator={false}
+      />
+      <Text style={styles.subtitle}>Top Albums</Text>
+      <FlatList
+        horizontal
+        data={topAlbums}
+        renderItem={renderTopAlbumsItem}
+        keyExtractor={item => item.id}
+        showsHorizontalScrollIndicator={false}
+      />
+      <Text style={styles.subtitle}>Top Artists</Text>
+      <FlatList
+        horizontal
+        data={topArtists}
+        renderItem={renderTopArtistsItem}
+        keyExtractor={item => item.id}
+        showsHorizontalScrollIndicator={false}
+      />
+      <Text style={styles.subtitle}>Podcasts</Text>
+      <FlatList
+        horizontal
+        data={podcasts}
+        renderItem={renderPodcastItem}
+        keyExtractor={item => item.id}
+        showsHorizontalScrollIndicator={false}
+      />
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f2f2f2',
-    padding: 20,
+    backgroundColor: '#fff',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
+    margin: 16,
   },
   subtitle: {
     fontSize: 18,
-    marginBottom: 20,
+    fontWeight: 'bold',
+    marginLeft: 16,
+    marginTop: 16,
   },
-  noPlaylists: {
-    fontSize: 16,
-    color: '#666',
+  itemContainer: {
+    alignItems: 'center',
+    marginHorizontal: 8,
   },
-  playlistContainer: {
-    padding: 10,
-    marginVertical: 5,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    width: '80%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
+  image: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
   },
-  playlistName: {
-    fontSize: 16,
+  itemText: {
+    marginTop: 8,
+    fontSize: 14,
+    textAlign: 'center',
   },
 });
 
