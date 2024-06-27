@@ -20,7 +20,7 @@ Follow these steps to get the app running locally:
 
 1. **Clone the repository**:
    ```sh
-   git clone https://github.com/your-username/melodique.git
+   git clone [https://github.com/your-username/melodique.git](https://github.com/sudais360/Melodique.git)
    cd melodique
    ```
 
