@@ -1,75 +1,84 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { Audio } from 'expo-av';
-import Slider from '@react-native-community/slider';
+import React, { useContext, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image } from 'react-native';
+import { AudioContext } from '../context/AudioContext';
 import NeomorphicControlButton from '../components/NeomorphicControlButton';
+import NeomorphicSlider from '../components/NeomorphicSlider';
 
 const SongPlayingPage = ({ route }) => {
-  const { track } = route.params;
-  const [sound, setSound] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const { track, tracks, currentIndex } = route.params;
+  const {
+    currentTrack,
+    isPlaying,
+    duration,
+    position,
+    playPauseAudio,
+    handleNext,
+    handlePrevious,
+    seekAudio,
+    setTracks,
+    setCurrentTrack,
+  } = useContext(AudioContext);
+
+  const [localPosition, setLocalPosition] = useState(0);
 
   useEffect(() => {
-    if (track && track.audio) {
-      console.log(track);
-      loadAudio();
-    } else {
-      console.error('Invalid audio URL');
+    if (tracks && tracks.length > 0) {
+      setTracks(tracks);
     }
-
-    return () => {
-      if (sound) {
-        sound.unloadAsync();
-      }
-    };
+    if (currentTrack?.audio !== track.audio) {
+      setCurrentTrack(track);
+    }
   }, [track]);
 
-  const loadAudio = async () => {
-    try {
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: track.audio },
-        { shouldPlay: false }
-      );
-      setSound(sound);
-    } catch (error) {
-      console.error('Error loading audio:', error);
-    }
-  };
+  useEffect(() => {
+    setLocalPosition(position);
+  }, [position]);
 
-  const playPauseAudio = async () => {
-    if (sound) {
+  useEffect(() => {
+    const interval = setInterval(() => {
       if (isPlaying) {
-        await sound.pauseAsync();
-      } else {
-        await sound.playAsync();
+        setLocalPosition((prevPosition) => Math.min(prevPosition + 1000, duration));
       }
-      setIsPlaying(!isPlaying);
-    }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isPlaying, duration]);
+
+  const handleSliderChange = async (value) => {
+    const newPosition = value * duration;
+    await seekAudio(newPosition);
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>SongPlayingPage</Text>
-      {track.image && <Image source={{ uri: track.image }} style={styles.image} />}
-      <Text style={styles.trackText}>Now Playing: {track.name}</Text>
-      <Text style={styles.trackText}>Artist: {track.artist_name}</Text>
-      <Text style={styles.trackText}>Album: {track.album_name}</Text>
+      {currentTrack?.image && <Image source={{ uri: currentTrack.image }} style={styles.image} />}
+      <Text style={styles.trackText}>Now Playing: {currentTrack?.name}</Text>
+      <Text style={styles.trackText}>Artist: {currentTrack?.artist_name}</Text>
+      <Text style={styles.trackText}>Album: {currentTrack?.album_name}</Text>
 
       <View style={styles.controlsContainer}>
-        <NeomorphicControlButton title="Prev" onPress={() => {}} />
+        <NeomorphicControlButton title="Prev" onPress={handlePrevious} />
         <NeomorphicControlButton title={isPlaying ? 'Pause' : 'Play'} onPress={playPauseAudio} />
-        <NeomorphicControlButton title="Next" onPress={() => {}} />
+        <NeomorphicControlButton title="Next" onPress={handleNext} />
       </View>
 
-      <Slider
-        style={styles.slider}
-        minimumValue={0}
-        maximumValue={1}
-        minimumTrackTintColor="#FFFFFF"
-        maximumTrackTintColor="#000000"
+      <NeomorphicSlider
+        value={duration ? localPosition / duration : 0}
+        onValueChange={handleSliderChange}
       />
+      <View style={styles.timeContainer}>
+        <Text style={styles.timeText}>{formatTime(localPosition)}</Text>
+        <Text style={styles.timeText}>{formatTime(duration)}</Text>
+      </View>
     </View>
   );
+};
+
+const formatTime = (millis) => {
+  const minutes = Math.floor(millis / 60000);
+  const seconds = ((millis % 60000) / 1000).toFixed(0);
+  return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 };
 
 const styles = StyleSheet.create({
@@ -83,6 +92,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    fontFamily: 'InriaSerif-Regular',
   },
   image: {
     width: 200,
@@ -93,6 +103,7 @@ const styles = StyleSheet.create({
   trackText: {
     fontSize: 18,
     marginBottom: 10,
+    fontFamily: 'InriaSerif-Regular',
   },
   controlsContainer: {
     flexDirection: 'row',
@@ -100,9 +111,15 @@ const styles = StyleSheet.create({
     width: '80%',
     marginVertical: 20,
   },
-  slider: {
-    width: 300,
-    height: 40,
+  timeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '80%',
+    marginTop: 10,
+  },
+  timeText: {
+    fontSize: 14,
+    fontFamily: 'InriaSerif-Regular',
   },
 });
 

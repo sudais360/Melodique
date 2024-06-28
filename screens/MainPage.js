@@ -10,42 +10,32 @@ const MainPage = ({ navigation }) => {
 
   useEffect(() => {
     fetchHotHits();
-    fetchTopAlbums();
     fetchTopArtists();
     fetchPodcasts();
   }, []);
 
   const fetchHotHits = async () => {
     try {
-      const response = await axios.get('https://api.jamendo.com/v3.0/tracks?client_id=c36a1722&format=json&limit=5&order=popularity_total');
+      const response = await axios.get('https://api.jamendo.com/v3.0/tracks?client_id=c36a1722&format=json&limit=10&order=popularity_total');
       const tracks = response.data.results.map(track => ({
         id: track.id,
         name: track.name,
-        audio: track.audio, // Ensure this field is available
+        audio: track.audio,
         image: track.album_image,
         artist_name: track.artist_name,
-        album_name: track.album_name
+        album_name: track.album_name,
+        album_id: track.album_id,
       }));
       setHotHits(tracks);
     } catch (error) {
       console.error(error);
     }
   };
-  
-  
 
-  const fetchTopAlbums = async () => {
-    try {
-      const response = await axios.get('https://api.jamendo.com/v3.0/albums?client_id=c36a1722&format=json&limit=5&order=popularity_total');
-      setTopAlbums(response.data.results);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   const fetchTopArtists = async () => {
     try {
-      const response = await axios.get('https://api.jamendo.com/v3.0/artists?client_id=c36a1722&format=json&limit=5&order=popularity_total');
+      const response = await axios.get('https://api.jamendo.com/v3.0/artists?client_id=c36a1722&format=json&limit=10&order=popularity_total');
       setTopArtists(response.data.results.filter(artist => artist.image));
     } catch (error) {
       console.error(error);
@@ -74,7 +64,7 @@ const MainPage = ({ navigation }) => {
           artist_name: item.artist_name || 'Unknown Artist',
           album_name: item.album_name || 'Unknown Album',
           image: item.image || 'default_image_url',
-          audio: item.audio // Ensure the audio URL is passed
+          audio: item.audio,
         } 
       })}
     >
@@ -82,14 +72,8 @@ const MainPage = ({ navigation }) => {
       <Text style={styles.itemText}>{item.name}</Text>
     </TouchableOpacity>
   );
-  
 
-  const renderTopAlbumsItem = ({ item }) => (
-    <TouchableOpacity style={styles.itemContainer} onPress={() => navigation.navigate('AlbumPage', { album: item })}>
-      <Image source={{ uri: item.image }} style={styles.image} />
-      <Text style={styles.itemText}>{item.name}</Text>
-    </TouchableOpacity>
-  );
+
 
   const renderTopArtistsItem = ({ item }) => (
     <TouchableOpacity style={styles.itemContainer} onPress={() => navigation.navigate('ArtistPage', { artist: item })}>
@@ -116,14 +100,7 @@ const MainPage = ({ navigation }) => {
         keyExtractor={item => item.id}
         showsHorizontalScrollIndicator={false}
       />
-      <Text style={styles.subtitle}>Top Albums</Text>
-      <FlatList
-        horizontal
-        data={topAlbums}
-        renderItem={renderTopAlbumsItem}
-        keyExtractor={item => item.id}
-        showsHorizontalScrollIndicator={false}
-      />
+
       <Text style={styles.subtitle}>Top Artists</Text>
       <FlatList
         horizontal
