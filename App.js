@@ -9,6 +9,7 @@ import MainPage from './screens/MainPage';
 import SongPlayingPage from './screens/SongPlayingPage';
 import AlbumPage from './screens/AlbumPage';
 import ArtistPage from './screens/ArtistPage';
+import PodcastPage from './screens/PodcastPage';
 import { AudioProvider } from './context/AudioContext';
 
 const Stack = createStackNavigator();
@@ -34,6 +35,8 @@ export default function App() {
           <Stack.Screen name="SongPlayingPage" component={SongPlayingPage} />
           <Stack.Screen name="AlbumPage" component={AlbumPage} />
           <Stack.Screen name="ArtistPage" component={ArtistPage} />
+          <Stack.Screen name="PodcastPage" component={PodcastPage} />
+
         </Stack.Navigator>
       </NavigationContainer>
     </AudioProvider>

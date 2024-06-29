@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
 import axios from 'axios';
 
 const ArtistPage = ({ route, navigation }) => {
@@ -27,47 +27,73 @@ const ArtistPage = ({ route, navigation }) => {
           name: item.name || 'Unknown Name',
           artist_name: artist.name || 'Unknown Artist',
           album_name: item.album_name || 'Unknown Album',
-          image: artist.image || 'default_image_url',
+          image: item.album_image || 'default_image_url',  // Use track's album image
           audio: item.audio,
         },
         tracks: tracks,
         currentIndex: index,
       })}
     >
+      <Image source={{ uri: item.album_image || 'default_image_url' }} style={styles.trackImage} />
       <Text style={styles.itemText}>{item.name}</Text>
     </TouchableOpacity>
   );
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>{artist.name}</Text>
-      <FlatList
-        data={tracks}
-        renderItem={renderTrackItem}
-        keyExtractor={item => item.id}
-      />
-    </ScrollView>
+    <FlatList
+      ListHeaderComponent={() => (
+        <View style={styles.headerContainer}>
+          <Text style={styles.title}>{artist.name}</Text>
+        </View>
+      )}
+      data={tracks}
+      renderItem={renderTrackItem}
+      keyExtractor={item => item.id}
+      contentContainerStyle={styles.container}
+    />
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#E0E5EC',
     padding: 16,
+  },
+  headerContainer: {
+    marginBottom: 16,
+    alignItems: 'center',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 16,
+    color: '#333',
   },
   itemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    marginVertical: 8,
+    backgroundColor: '#E0E5EC',
+    borderRadius: 10,
+    shadowOffset: { width: -2, height: -2 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    shadowColor: '#ffffff',
+    elevation: 5,
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    shadowColor: '#000000',
+  },
+  trackImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 16,
   },
   itemText: {
     fontSize: 16,
+    color: '#333',
   },
 });
 
