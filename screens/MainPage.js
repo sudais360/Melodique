@@ -1,12 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, StyleSheet, Image, FlatList, TouchableOpacity, ScrollView } from 'react-native';
 import axios from 'axios';
+import MiniPlayer from '../components/MiniPlayer';
+import { AudioContext } from '../context/AudioContext';
 
 const MainPage = ({ navigation }) => {
   const [hotHits, setHotHits] = useState([]);
   const [topArtists, setTopArtists] = useState([]);
   const [podcasts, setPodcasts] = useState([]);
   const [radioStations, setRadioStations] = useState([]);
+  const { currentTrack } = useContext(AudioContext);
 
   const podcastGenres = [
     'Technology', 'Business', 'Comedy', 'Education', 'Health', 'News', 'Science', 'Sports', 'History', 'Music'
@@ -155,49 +158,52 @@ const MainPage = ({ navigation }) => {
   );
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Melodique</Text>
+    <View style={styles.container}>
+      <ScrollView>
+        <Text style={styles.title}>Melodique</Text>
 
-      <Text style={styles.subtitle}>Hot Hits</Text>
-      <FlatList
-        horizontal
-        data={hotHits}
-        renderItem={renderHotHitsItem}
-        keyExtractor={item => item.id}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.horizontalList}
-      />
+        <Text style={styles.subtitle}>Hot Hits</Text>
+        <FlatList
+          horizontal
+          data={hotHits}
+          renderItem={renderHotHitsItem}
+          keyExtractor={item => item.id}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.horizontalList}
+        />
 
-      <Text style={styles.subtitle}>Top Artists</Text>
-      <FlatList
-        horizontal
-        data={topArtists}
-        renderItem={renderTopArtistsItem}
-        keyExtractor={item => item.id}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.horizontalList}
-      />
+        <Text style={styles.subtitle}>Top Artists</Text>
+        <FlatList
+          horizontal
+          data={topArtists}
+          renderItem={renderTopArtistsItem}
+          keyExtractor={item => item.id}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.horizontalList}
+        />
 
-      <Text style={styles.subtitle}>Podcast Genres</Text>
-      <FlatList
-        horizontal
-        data={podcastGenres}
-        renderItem={renderGenreItem}
-        keyExtractor={item => item}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.horizontalList}
-      />
+        <Text style={styles.subtitle}>Podcast Genres</Text>
+        <FlatList
+          horizontal
+          data={podcastGenres}
+          renderItem={renderGenreItem}
+          keyExtractor={item => item}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.horizontalList}
+        />
 
-      <Text style={styles.subtitle}>Radio Stations</Text>
-      <FlatList
-        horizontal
-        data={radioStations}
-        renderItem={renderRadioStationItem}
-        keyExtractor={item => item.stationuuid}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.horizontalList}
-      />
-    </ScrollView>
+        <Text style={styles.subtitle}>Radio Stations</Text>
+        <FlatList
+          horizontal
+          data={radioStations}
+          renderItem={renderRadioStationItem}
+          keyExtractor={item => item.stationuuid}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.horizontalList}
+        />
+      </ScrollView>
+      {currentTrack && <MiniPlayer navigation={navigation} />}
+    </View>
   );
 };
 

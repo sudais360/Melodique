@@ -1,10 +1,10 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
+import { TouchableOpacity,Image, Text, StyleSheet, View } from 'react-native';
 
-const NeomorphicControlButton = ({ title, onPress }) => {
+const NeomorphicControlButton = ({ imageSource, onPress }) => {
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
-      <Text style={styles.text}>{title}</Text>
+      <Image source={imageSource} style={styles.image} />
     </TouchableOpacity>
   );
 };
@@ -23,9 +23,9 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 8,
   },
-  text: {
-    fontSize: 14,
-    fontWeight: 'bold',
+  image: {
+    width: 30,
+    height: 30,
   },
 });
 

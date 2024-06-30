@@ -58,11 +58,19 @@ const SongPlayingPage = ({ route }) => {
       <Text style={styles.trackText}>Album: {currentTrack?.album_name}</Text>
 
       <View style={styles.controlsContainer}>
-        <NeomorphicControlButton title="Prev" onPress={handlePrevious} />
-        <NeomorphicControlButton title={isPlaying ? 'Pause' : 'Play'} onPress={playPauseAudio} />
-        <NeomorphicControlButton title="Next" onPress={handleNext} />
-      </View>
-
+          <NeomorphicControlButton 
+            imageSource={require('../assets/Images/songplayingpage/previous.png')}
+            onPress={handlePrevious} 
+          />
+          <NeomorphicControlButton 
+            imageSource={isPlaying ? require('../assets/Images/songplayingpage/pause.png') : require('../assets/Images/songplayingpage/play.png')} 
+            onPress={playPauseAudio} 
+          />
+          <NeomorphicControlButton 
+            imageSource={require('../assets/Images/songplayingpage/next.png')} 
+            onPress={handleNext} 
+          />
+        </View>
       <NeomorphicSlider
         value={duration ? localPosition / duration : 0}
         onValueChange={handleSliderChange}

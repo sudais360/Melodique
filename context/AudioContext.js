@@ -72,7 +72,7 @@ const AudioProvider = ({ children }) => {
       setCurrentIndex(nextIndex);
       setCurrentTrack(tracks[nextIndex]);
       setPosition(0);
-      setIsPlaying(false);
+      setIsPlaying(true); // Automatically start playing the next track
     }
   };
 
@@ -82,7 +82,7 @@ const AudioProvider = ({ children }) => {
       setCurrentIndex(prevIndex);
       setCurrentTrack(tracks[prevIndex]);
       setPosition(0);
-      setIsPlaying(false);
+      setIsPlaying(true); // Automatically start playing the previous track
     }
   };
 
@@ -90,6 +90,15 @@ const AudioProvider = ({ children }) => {
     if (soundRef.current) {
       await soundRef.current.setPositionAsync(newPosition);
       setPosition(newPosition);
+    }
+  };
+
+  const stopAudio = async () => {
+    if (soundRef.current) {
+      await soundRef.current.unloadAsync();
+      soundRef.current = null;
+      setIsPlaying(false);
+      setCurrentTrack(null);
     }
   };
 
@@ -109,6 +118,7 @@ const AudioProvider = ({ children }) => {
         handleNext,
         handlePrevious,
         seekAudio,
+        stopAudio,
       }}
     >
       {children}
