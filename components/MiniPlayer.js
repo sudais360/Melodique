@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, Animated, PanResponder
 import { AudioContext } from '../context/AudioContext';
 import NeomorphicControlButton from './NeomorphicControlButton';
 
-const { height } = Dimensions.get('window');
+const { height, width  } = Dimensions.get('window');
 
 const MiniPlayer = ({ navigation }) => {
   const {
@@ -27,15 +27,15 @@ const MiniPlayer = ({ navigation }) => {
         { useNativeDriver: false }
       ),
       onPanResponderRelease: (evt, gestureState) => {
-        if (gestureState.dy > 50) {  // Reduced threshold for easier swipe detection
+        if (gestureState.dy > 50) {
           // User swiped down - stop audio and hide mini player
           Animated.timing(translateY, {
             toValue: height,
-            duration: 200,  // Adjusted duration for a smoother animation
+            duration: 200,
             useNativeDriver: true,
           }).start(() => {
             stopAudio();
-            translateY.setValue(0); // Reset position for next appearance
+            translateY.setValue(0);
           });
         } else {
           // User did not swipe down enough - reset position
@@ -55,12 +55,12 @@ const MiniPlayer = ({ navigation }) => {
       useNativeDriver: true,
     }).start(() => {
       navigation.navigate('SongPlayingPage', { track: currentTrack });
-      translateY.setValue(0); // Reset the animation
+      translateY.setValue(0);
     });
   };
 
   if (!currentTrack) {
-    return null; // Don't show the mini player if no track is currently playing
+    return null;
   }
 
   return (
@@ -92,6 +92,9 @@ const MiniPlayer = ({ navigation }) => {
           />
         </View>
       </TouchableOpacity>
+      <View style={styles.progressBarContainer}>
+        <Animated.View style={[styles.progressBar, { width: `${(currentTrack.position / currentTrack.duration) * 100}%` }]} />
+      </View>
     </Animated.View>
   );
 };
@@ -100,16 +103,26 @@ const styles = StyleSheet.create({
   miniPlayerContainer: {
     position: 'absolute',
     bottom: 0,
-    width: '100%',
+    width: '113%' ,
     zIndex: 1,
-    backgroundColor: '#f0f4f8',
-    borderTopWidth: 1,
-    borderColor: '#ccc',
+    backgroundColor: '#E5E5E5',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 5,
+    marginBottom: 0
   },
   miniPlayerContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
   },
   image: {
     width: 50,
@@ -121,17 +134,25 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   trackName: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#333',
   },
   trackArtist: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#666',
   },
   controls: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  progressBarContainer: {
+    height: 2,
+    backgroundColor: '#ddd',
+  },
+  progressBar: {
+    height: 2,
+    backgroundColor: '#1DB954',
   },
 });
 

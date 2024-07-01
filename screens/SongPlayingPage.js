@@ -1,11 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
+import axios from 'axios';
 import { AudioContext } from '../context/AudioContext';
 import NeomorphicControlButton from '../components/NeomorphicControlButton';
 import NeomorphicSlider from '../components/NeomorphicSlider';
 
-const SongPlayingPage = ({ route }) => {
-  const { track, tracks, currentIndex } = route.params;
+const SongPlayingPage = ({ route, navigation }) => {
+  const { track, tracks, currentIndex, userId } = route.params;
   const {
     currentTrack,
     isPlaying,
@@ -47,12 +48,52 @@ const SongPlayingPage = ({ route }) => {
     await seekAudio(newPosition);
   };
 
+  const likeSong = async () => {
+    const apiUrl = 'http://192.168.1.17:5000/like-song';  // Replace with actual API URL
+    console.log('Liking song at:', apiUrl);
+
+    try {
+      const response = await axios.post(apiUrl, {
+        userId: userId,  // Use destructured userId directly
+        trackId: currentTrack.id
+      });
+      console.log('Response:', response.data);
+      alert('Song liked!');
+      
+      // Navigate back to update the liked songs list
+      navigation.navigate('LikedSongs', { userId: userId });
+    } catch (error) {
+      console.error('Error liking song:', error);
+      alert('Error liking song.');
+    }
+  };
+
+  const formatTime = (millis) => {
+    const minutes = Math.floor(millis / 60000);
+    const seconds = ((millis % 60000) / 1000).toFixed(0);
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  };
+  
+
   return (
     <View style={styles.container}>
       {currentTrack?.image && <Image source={{ uri: currentTrack.image }} style={styles.image} />}
       <Text style={styles.trackText}>Now Playing: {currentTrack?.name}</Text>
       <Text style={styles.trackText}>Artist: {currentTrack?.artist_name}</Text>
       <Text style={styles.trackText}>Album: {currentTrack?.album_name}</Text>
+
+
+
+      <NeomorphicSlider
+        value={duration ? localPosition / duration : 0}
+        onValueChange={handleSliderChange}
+        style={styles.slider}
+      />
+      
+      <View style={styles.timeContainer}>
+        <Text style={styles.timeText}>{formatTime(localPosition)}</Text>
+        <Text style={styles.timeText}>{formatTime(duration)}</Text>
+      </View>
 
       <View style={styles.controlsContainer}>
         <NeomorphicControlButton
@@ -67,24 +108,16 @@ const SongPlayingPage = ({ route }) => {
           imageSource={require('../assets/Images/songplayingpage/next.png')}
           onPress={handleNext}
         />
-      </View>
-      <NeomorphicSlider
-        value={duration ? localPosition / duration : 0}
-        onValueChange={handleSliderChange}
+        <NeomorphicControlButton
+        imageSource={require('../assets/Images/songplayingpage/like.png')} // Add a like icon in your assets folder
+        onPress={likeSong}
+        style={styles.likeButton}
       />
-      <View style={styles.timeContainer}>
-        <Text style={styles.timeText}>{formatTime(localPosition)}</Text>
-        <Text style={styles.timeText}>{formatTime(duration)}</Text>
       </View>
     </View>
   );
 };
 
-const formatTime = (millis) => {
-  const minutes = Math.floor(millis / 60000);
-  const seconds = ((millis % 60000) / 1000).toFixed(0);
-  return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-};
 
 const styles = StyleSheet.create({
   container: {
@@ -104,6 +137,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 10,
     fontFamily: 'InriaSerif-Regular',
+    textAlign: 'center',
+  },
+  likeButton: {
+    marginBottom: 20,
+  },
+  slider: {
+    marginBottom: 20,
   },
   controlsContainer: {
     flexDirection: 'row',

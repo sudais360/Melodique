@@ -108,6 +108,50 @@ def get_playlists(user_id):
     except Exception as e:
         print(f"Error in get_playlists: {e}")
         return jsonify({"message": "Internal Server Error"}), 500
+    
+# Add a liked song
+@app.route('/like-song', methods=['POST'])
+def like_song():
+    try:
+        data = request.json
+        print(f"Received like song data: {data}")
+
+        user_id = data.get('userId')
+        track_id = data.get('trackId')
+
+        if not all([user_id, track_id]):
+            print("Missing required fields.")
+            return jsonify({"message": "Missing required fields"}), 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO dbo.liked_songs (user_id, song_id) VALUES (?, ?)", (user_id, track_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({"message": "Song liked successfully"}), 200
+    except Exception as e:
+        print(f"Error in like_song: {e}")
+        return jsonify({"message": "Internal Server Error"}), 500
+
+
+@app.route('/liked-songs/<int:user_id>', methods=['GET'])
+def get_liked_songs(user_id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT song_id FROM dbo.liked_songs WHERE user_id = ?", (user_id,))
+        liked_songs = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        liked_song_ids = [song[0] for song in liked_songs]
+        return jsonify(liked_song_ids), 200
+    except Exception as e:
+        print(f"Error in get_liked_songs: {e}")
+        return jsonify({"message": "Internal Server Error"}), 500
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -1,13 +1,17 @@
+// DrawerContent.js
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'; // Added MaterialCommunityIcons for sand timer icon
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
-const DrawerContent = ({ navigation }) => {
+const DrawerContent = ({ navigation, userId }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Menu</Text>
       <View style={styles.menuItemsContainer}>
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('LikedSongs')}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('LikedSongs', { userId })}
+        >
           <Ionicons name="heart" size={24} color="black" style={styles.icon} />
           <Text style={styles.menuItemText}>Liked Songs</Text>
         </TouchableOpacity>
@@ -28,7 +32,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f8f9fa', // Background color for the drawer
+    backgroundColor: '#f8f9fa',
   },
   title: {
     fontSize: 24,
@@ -38,7 +42,6 @@ const styles = StyleSheet.create({
   },
   menuItemsContainer: {
     flex: 1,
-    
   },
   menuItem: {
     flexDirection: 'row',
@@ -52,7 +55,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 5,
-    
   },
   icon: {
     marginRight: 15,

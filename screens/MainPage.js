@@ -8,13 +8,14 @@ import SearchResults from '../components/SearchResults';
 import Header from '../components/Header'; // Import the Header component
 import { fetchHotHits, fetchTrackDetails } from '../context/api'; // Import the updated function
 
-const MainPage = ({ navigation }) => {
+const MainPage = ({route,navigation }) => {
   const [hotHits, setHotHits] = useState([]);
   const [topArtists, setTopArtists] = useState([]);
   const [podcasts, setPodcasts] = useState([]);
   const [radioStations, setRadioStations] = useState([]);
   const [results, setResults] = useState([]);
   const { currentTrack, setTracks, setCurrentTrack } = useContext(AudioContext);
+  const { userId } = route.params;
 
   const podcastGenres = [
     'Technology', 'Business', 'Comedy', 'Education', 'Health', 'News', 'Science', 'Sports', 'History', 'Music'
@@ -102,6 +103,7 @@ const MainPage = ({ navigation }) => {
       track,
       tracks: [track],
       currentIndex: 0,
+      userId: userId,
     });
   };
 
@@ -236,8 +238,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    marginTop:100,
-    marginBottom:70,
+    marginTop:60,
+    marginBottom:20,
 
   },
   innerContainer: {
@@ -251,6 +253,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 10,
+    marginTop:40,
+    marginBottom:50,
   },
   title: {
     fontSize: 28,

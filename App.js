@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react'; // Ensure useState is imported
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
@@ -21,12 +21,13 @@ import { AudioProvider } from './context/AudioContext';
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
-const MainStackNavigator = () => {
+const MainStackNavigator = ({ route, navigation }) => {
+  const { userId } = route.params;
   return (
     <Stack.Navigator initialRouteName="Login">
       <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Signup" component={SignupScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="MainPage" component={MainPage} options={{ headerShown: false }} />
+      <Stack.Screen name="MainPage" component={MainPage} options={{ headerShown: false }} initialParams={{ userId }} />
       <Stack.Screen name="SongPlayingPage" component={SongPlayingPage} />
       <Stack.Screen name="AlbumPage" component={AlbumPage} />
       <Stack.Screen name="ArtistPage" component={ArtistPage} />
@@ -38,6 +39,7 @@ const MainStackNavigator = () => {
 
 export default function App() {
   const fontsLoaded = useFonts();
+  const [userId, setUserId] = useState(1); // Simulating userId for demonstration
 
   if (!fontsLoaded) {
     return (
@@ -50,8 +52,10 @@ export default function App() {
   return (
     <AudioProvider>
       <NavigationContainer>
-        <Drawer.Navigator drawerContent={props => <DrawerContent {...props} />}>
-          <Drawer.Screen name="Home" component={MainStackNavigator} options={{ headerShown: false }}/>
+        <Drawer.Navigator drawerContent={props => <DrawerContent {...props} userId={userId} />}>
+          <Drawer.Screen name="Home" options={{ headerShown: false }}>
+            {props => <MainStackNavigator {...props} route={{ params: { userId } }}  />}
+          </Drawer.Screen>
           <Drawer.Screen name="LikedSongs" component={LikedSongs} />
           <Drawer.Screen name="Playlists" component={Playlists} />
           <Drawer.Screen name="Timer" component={Timer} />
