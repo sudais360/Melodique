@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { SafeAreaView, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import NeomorphicButton from '../components/NeomorphicButton';
 import NeomorphicInput from '../components/NeomorphicInput';
-import { login } from '../api';
+import { login } from '../context/api';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');

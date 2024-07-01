@@ -24,11 +24,9 @@ const SongPlayingPage = ({ route }) => {
   useEffect(() => {
     if (tracks && tracks.length > 0) {
       setTracks(tracks);
+      setCurrentTrack(tracks[currentIndex]);
     }
-    if (currentTrack?.audio !== track.audio) {
-      setCurrentTrack(track);
-    }
-  }, [track]);
+  }, [track, tracks, currentIndex, setTracks, setCurrentTrack]);
 
   useEffect(() => {
     setLocalPosition(position);
@@ -51,26 +49,25 @@ const SongPlayingPage = ({ route }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>SongPlayingPage</Text>
       {currentTrack?.image && <Image source={{ uri: currentTrack.image }} style={styles.image} />}
       <Text style={styles.trackText}>Now Playing: {currentTrack?.name}</Text>
       <Text style={styles.trackText}>Artist: {currentTrack?.artist_name}</Text>
       <Text style={styles.trackText}>Album: {currentTrack?.album_name}</Text>
 
       <View style={styles.controlsContainer}>
-          <NeomorphicControlButton 
-            imageSource={require('../assets/Images/songplayingpage/previous.png')}
-            onPress={handlePrevious} 
-          />
-          <NeomorphicControlButton 
-            imageSource={isPlaying ? require('../assets/Images/songplayingpage/pause.png') : require('../assets/Images/songplayingpage/play.png')} 
-            onPress={playPauseAudio} 
-          />
-          <NeomorphicControlButton 
-            imageSource={require('../assets/Images/songplayingpage/next.png')} 
-            onPress={handleNext} 
-          />
-        </View>
+        <NeomorphicControlButton
+          imageSource={require('../assets/Images/songplayingpage/previous.png')}
+          onPress={handlePrevious}
+        />
+        <NeomorphicControlButton
+          imageSource={isPlaying ? require('../assets/Images/songplayingpage/pause.png') : require('../assets/Images/songplayingpage/play.png')}
+          onPress={playPauseAudio}
+        />
+        <NeomorphicControlButton
+          imageSource={require('../assets/Images/songplayingpage/next.png')}
+          onPress={handleNext}
+        />
+      </View>
       <NeomorphicSlider
         value={duration ? localPosition / duration : 0}
         onValueChange={handleSliderChange}
@@ -95,12 +92,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    fontFamily: 'InriaSerif-Regular',
+    padding: 20,
   },
   image: {
     width: 200,

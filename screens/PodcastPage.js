@@ -20,7 +20,7 @@ const PodcastPage = ({ route, navigation }) => {
           q: genre,
           audio: true,
           type: 'episode',
-          limit: 10
+          limit: 1
         }
       });
       setPodcasts(response.data.results);

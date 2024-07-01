@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { SafeAreaView, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import NeomorphicButton from '../components/NeomorphicButton';
 import NeomorphicInput from '../components/NeomorphicInput';
-import { signup, login } from '../api';
+import { signup, login } from '../context/api';
 
 const SignupScreen = ({ navigation }) => {
   const [name, setName] = useState('');

@@ -11,6 +11,7 @@ const AudioProvider = ({ children }) => {
   const [currentTrack, setCurrentTrack] = useState(null);
   const [tracks, setTracks] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const soundRef = useRef(null);
 
@@ -21,24 +22,36 @@ const AudioProvider = ({ children }) => {
   }, [currentTrack]);
 
   const loadAudio = async (track) => {
+    if (isLoading || !track || !track.audio) {
+      console.error('Invalid track or audio source', track);
+      return;
+    }
+    setIsLoading(true);
+
     if (soundRef.current) {
       await soundRef.current.unloadAsync();
       soundRef.current.setOnPlaybackStatusUpdate(null);
       soundRef.current = null;
     }
 
-    const { sound } = await Audio.Sound.createAsync(
-      { uri: track.audio },
-      { shouldPlay: false }
-    );
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: track.audio },
+        { shouldPlay: false }
+      );
 
-    soundRef.current = sound;
-    setSound(sound);
+      soundRef.current = sound;
+      setSound(sound);
 
-    sound.setOnPlaybackStatusUpdate(updatePlaybackStatus);
+      sound.setOnPlaybackStatusUpdate(updatePlaybackStatus);
 
-    if (isPlaying) {
-      await sound.playAsync();
+      if (isPlaying) {
+        await sound.playAsync();
+      }
+    } catch (error) {
+      console.error('Error loading audio:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -72,7 +85,7 @@ const AudioProvider = ({ children }) => {
       setCurrentIndex(nextIndex);
       setCurrentTrack(tracks[nextIndex]);
       setPosition(0);
-      setIsPlaying(true); // Automatically start playing the next track
+      setIsPlaying(true);
     }
   };
 
@@ -82,7 +95,7 @@ const AudioProvider = ({ children }) => {
       setCurrentIndex(prevIndex);
       setCurrentTrack(tracks[prevIndex]);
       setPosition(0);
-      setIsPlaying(true); // Automatically start playing the previous track
+      setIsPlaying(true);
     }
   };
 
