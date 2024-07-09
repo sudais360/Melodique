@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { SafeAreaView, Text, StyleSheet, Image, TouchableOpacity, Alert, View, TextInput, Button } from 'react-native';
+import { SafeAreaView, Text, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
 import NeomorphicButton from '../components/NeomorphicButton';
 import NeomorphicInput from '../components/NeomorphicInput';
-import { login } from '../context/api';
+import { API_BASE_URL } from '../config';
 
-const LoginScreen = ({ navigation, route }) => {
-  const { role } = route.params || {};
+const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -22,12 +21,12 @@ const LoginScreen = ({ navigation, route }) => {
     }
 
     try {
-      const response = await fetch('http://192.168.1.17:5000/login', {
+      const response = await fetch(`${API_BASE_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password, role }),
+        body: JSON.stringify({ email, password }),
       });
 
       if (response.status === 401) {
@@ -41,15 +40,9 @@ const LoginScreen = ({ navigation, route }) => {
       }
 
       const data = await response.json();
-
-      if (role === 'employer') {
-        console.log("Login successful, employerId:", data.user_id);
-        navigation.navigate('EmployerStack', { employerId: data.user_id });
-      } else {
-        console.log("Login successful, employeeId:", data.user_id);
-        navigation.navigate('EmployeeStack', { employeeId: data.user_id });
-      }
-
+      console.log("Login successful, userId:", data.user_id);
+      navigation.navigate('MainPage', { userId: data.user_id });
+      
     } catch (error) {
       console.error('Login error:', error);
       Alert.alert('Alert', 'An error occurred. Please try again.');
@@ -57,7 +50,7 @@ const LoginScreen = ({ navigation, route }) => {
   };
 
   const handleSignUp = () => {
-    navigation.navigate('Signup', { role });
+    navigation.navigate('Signup');
   };
 
   return (
@@ -80,7 +73,7 @@ const LoginScreen = ({ navigation, route }) => {
           onChangeText={setPassword}
           secureTextEntry
         />
-        <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+        <TouchableOpacity onPress={handleSignUp}>
           <Text style={styles.signupText}>Ready to vibe? Join us now!</Text>
         </TouchableOpacity>
         <NeomorphicButton title="Login" onPress={handleLogin} />

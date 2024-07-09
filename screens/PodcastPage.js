@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react
 import axios from 'axios';
 
 const PodcastPage = ({ route, navigation }) => {
-  const { genre } = route.params;
+  const { genre, userId } = route.params;  // Extract userId from route params
   const [podcasts, setPodcasts] = useState([]);
 
   useEffect(() => {
@@ -32,15 +32,21 @@ const PodcastPage = ({ route, navigation }) => {
   const renderPodcastItem = ({ item }) => (
     <TouchableOpacity 
       style={styles.itemContainer} 
-      onPress={() => navigation.navigate('SongPlayingPage', { 
-        track: {
-          name: item.title_original || 'Unknown Title',
-          artist_name: item.publisher_original || 'Unknown Publisher',
-          album_name: item.publisher_original || 'Unknown Album',
-          image: item.thumbnail || 'default_image_url',
-          audio: item.audio || 'audio_url_placeholder',
-        } 
-      })}
+      onPress={() => {
+        console.log('Navigating to SongPlayingPage with track:', item); // Debug log
+        navigation.navigate('SongPlayingPage', { 
+          track: {
+            name: item.title_original || 'Unknown Title',
+            artist_name: item.publisher_original || 'Unknown Publisher',
+            album_name: item.publisher_original || 'Unknown Album',
+            image: item.thumbnail || 'default_image_url',
+            audio: item.audio || 'audio_url_placeholder',
+          },
+          tracks: podcasts, // Pass the entire podcast list if needed
+          currentIndex: podcasts.indexOf(item), // Find the index of the current item
+          userId: userId  // Pass userId
+        });
+      }}
     >
       <Image source={{ uri: item.thumbnail }} style={styles.image} />
       <View style={styles.textContainer}>
@@ -74,10 +80,10 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   itemContainer: {
-    flexDirection: 'row', // Add this to arrange items horizontally
+    flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: 8,
-    marginVertical: 12, // Add some vertical margin for better spacing
+    marginVertical: 12,
     backgroundColor: '#E0E5EC',
     borderRadius: 10,
     shadowOffset: { width: -2, height: -2 },
@@ -97,7 +103,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   textContainer: {
-    marginLeft: 16, // Add some spacing between the image and the text
+    marginLeft: 16,
     flex: 1,
   },
   itemText: {

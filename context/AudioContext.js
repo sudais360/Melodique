@@ -37,7 +37,7 @@ const AudioProvider = ({ children }) => {
     try {
       const { sound } = await Audio.Sound.createAsync(
         { uri: track.audio },
-        { shouldPlay: false }
+        { shouldPlay: true }
       );
 
       soundRef.current = sound;
@@ -45,9 +45,8 @@ const AudioProvider = ({ children }) => {
 
       sound.setOnPlaybackStatusUpdate(updatePlaybackStatus);
 
-      if (isPlaying) {
-        await sound.playAsync();
-      }
+      console.log('Audio loaded successfully:', track.audio);
+      await sound.playAsync();
     } catch (error) {
       console.error('Error loading audio:', error);
     } finally {

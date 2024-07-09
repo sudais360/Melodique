@@ -92,9 +92,6 @@ const MiniPlayer = ({ navigation }) => {
           />
         </View>
       </TouchableOpacity>
-      <View style={styles.progressBarContainer}>
-        <Animated.View style={[styles.progressBar, { width: `${(currentTrack.position / currentTrack.duration) * 100}%` }]} />
-      </View>
     </Animated.View>
   );
 };
@@ -145,6 +142,7 @@ const styles = StyleSheet.create({
   controls: {
     flexDirection: 'row',
     alignItems: 'center',
+    
   },
   progressBarContainer: {
     height: 2,

@@ -1,12 +1,20 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
-import axios from 'axios';
 import { AudioContext } from '../context/AudioContext';
 import NeomorphicControlButton from '../components/NeomorphicControlButton';
 import NeomorphicSlider from '../components/NeomorphicSlider';
+import axios from 'axios';
+import { API_BASE_URL } from '../config';
 
 const SongPlayingPage = ({ route, navigation }) => {
   const { track, tracks, currentIndex, userId } = route.params;
+
+  // Debugging logs
+  console.log('Received track:', track);
+  console.log('Received tracks:', tracks);
+  console.log('Received currentIndex:', currentIndex);
+  console.log('Received userId:', userId);
+
   const {
     currentTrack,
     isPlaying,
@@ -49,21 +57,34 @@ const SongPlayingPage = ({ route, navigation }) => {
   };
 
   const likeSong = async () => {
-    const apiUrl = 'http://192.168.1.17:5000/like-song';  // Replace with actual API URL
+    const apiUrl = `${API_BASE_URL}/like-song` ;
     console.log('Liking song at:', apiUrl);
 
     try {
       const response = await axios.post(apiUrl, {
-        userId: userId,  // Use destructured userId directly
-        trackId: currentTrack.id
+        userId: userId,
+        trackId: currentTrack.id,
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
       console.log('Response:', response.data);
       alert('Song liked!');
-      
+
       // Navigate back to update the liked songs list
       navigation.navigate('LikedSongs', { userId: userId });
     } catch (error) {
-      console.error('Error liking song:', error);
+      console.error('Error liking song:', error.message);
+      if (error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+        console.error('Response headers:', error.response.headers);
+      } else if (error.request) {
+        console.error('Request data:', error.request);
+      } else {
+        console.error('Error message:', error.message);
+      }
       alert('Error liking song.');
     }
   };
@@ -73,59 +94,69 @@ const SongPlayingPage = ({ route, navigation }) => {
     const seconds = ((millis % 60000) / 1000).toFixed(0);
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
-  
 
   return (
     <View style={styles.container}>
-      {currentTrack?.image && <Image source={{ uri: currentTrack.image }} style={styles.image} />}
-      <Text style={styles.trackText}>Now Playing: {currentTrack?.name}</Text>
-      <Text style={styles.trackText}>Artist: {currentTrack?.artist_name}</Text>
-      <Text style={styles.trackText}>Album: {currentTrack?.album_name}</Text>
+      <View style={styles.content}>
+        {currentTrack?.image && <Image source={{ uri: currentTrack.image }} style={styles.image} />}
+        <Text style={styles.trackText}>Now Playing: {currentTrack?.name}</Text>
+        <Text style={styles.trackText}>Artist: {currentTrack?.artist_name}</Text>
+        <Text style={styles.trackText}>Album: {currentTrack?.album_name}</Text>
 
-
-
-      <NeomorphicSlider
-        value={duration ? localPosition / duration : 0}
-        onValueChange={handleSliderChange}
-        style={styles.slider}
-      />
-      
-      <View style={styles.timeContainer}>
-        <Text style={styles.timeText}>{formatTime(localPosition)}</Text>
-        <Text style={styles.timeText}>{formatTime(duration)}</Text>
-      </View>
-
-      <View style={styles.controlsContainer}>
-        <NeomorphicControlButton
-          imageSource={require('../assets/Images/songplayingpage/previous.png')}
-          onPress={handlePrevious}
+        <NeomorphicSlider
+          value={duration ? localPosition / duration : 0}
+          onValueChange={handleSliderChange}
+          style={styles.slider}
         />
-        <NeomorphicControlButton
-          imageSource={isPlaying ? require('../assets/Images/songplayingpage/pause.png') : require('../assets/Images/songplayingpage/play.png')}
-          onPress={playPauseAudio}
-        />
-        <NeomorphicControlButton
-          imageSource={require('../assets/Images/songplayingpage/next.png')}
-          onPress={handleNext}
-        />
-        <NeomorphicControlButton
-        imageSource={require('../assets/Images/songplayingpage/like.png')} // Add a like icon in your assets folder
-        onPress={likeSong}
-        style={styles.likeButton}
-      />
+        
+        <View style={styles.timeContainer}>
+          <Text style={styles.timeText}>{formatTime(localPosition)}</Text>
+          <Text style={styles.timeText}>{formatTime(duration)}</Text>
+        </View>
+
+        <View style={styles.controlsContainer}>
+          <NeomorphicControlButton
+            imageSource={require('../assets/Images/songplayingpage/previous.png')}
+            onPress={handlePrevious}
+          />
+          <NeomorphicControlButton
+            imageSource={isPlaying ? require('../assets/Images/songplayingpage/pause.png') : require('../assets/Images/songplayingpage/play.png')}
+            onPress={playPauseAudio}
+          />
+          <NeomorphicControlButton
+            imageSource={require('../assets/Images/songplayingpage/next.png')}
+            onPress={handleNext}
+          />
+          <NeomorphicControlButton
+            imageSource={require('../assets/Images/songplayingpage/like.png')}
+            onPress={likeSong}
+            style={styles.likeButton}
+          />
+        </View>
       </View>
     </View>
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
     justifyContent: 'center',
-    padding: 20,
+    alignItems: 'center',
+    padding: 10,
+  },
+  content: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 30,
+    alignItems: 'center',
+    width: '90%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
   },
   image: {
     width: 200,
@@ -143,19 +174,20 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   slider: {
+    width: '100%',
     marginBottom: 20,
   },
   controlsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    width: '80%',
+    width: '110%',
     marginVertical: 20,
   },
   timeContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '80%',
-    marginTop: 10,
+    width: '100%',
+    paddingHorizontal: 20,
   },
   timeText: {
     fontSize: 14,

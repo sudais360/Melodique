@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import axios from 'axios';
+import { API_BASE_URL } from '../config';
 
 const LikedSongs = ({ route, navigation }) => {
   const { userId } = route.params;
@@ -15,7 +16,7 @@ const LikedSongs = ({ route, navigation }) => {
   const fetchLikedSongs = async () => {
     try {
       // Fetch liked song IDs from the backend
-      const response = await axios.get(`http://192.168.1.17:5000/liked-songs/${userId}`);
+      const response = await axios.get(`${API_BASE_URL}/liked-songs/${userId}`);
       const likedSongIds = response.data;
 
       // Fetch detailed information for each liked song from Jamendo API
